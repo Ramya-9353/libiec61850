@@ -385,6 +385,19 @@ decodeInt16FixedSize(int16_t* outValue, uint8_t* buffer, int bufPos)
     return bufPos;
 }
 
+/* compare without early exit to not leak the number of matching signature bytes */
+static int
+constantTimeCompare(const uint8_t* a, const uint8_t* b, int size)
+{
+    uint8_t diff = 0;
+
+    int i;
+    for (i = 0; i < size; i++)
+        diff |= a[i] ^ b[i];
+
+    return diff;
+}
+
 static bool
 lookupKey(RSession self, uint32_t keyId, uint8_t** key, int* keySize,  RSecurityAlgorithm* secAlgo, RSignatureAlgorithm* sigAlgo)
 {
@@ -614,7 +627,7 @@ parseSessionMessage(RSession self, uint8_t* buffer, int msgSize, RSessionPayload
 
                         if (sigAlgo == R_SESSION_SIG_ALGO_HMAC_SHA256_128)
                         {
-                            if (memcmp(signatureBuffer, buffer + payloadEnd + 2, 16))
+                            if (constantTimeCompare(signatureBuffer, buffer + payloadEnd + 2, 16))
                             {
                                 DEBUG_PRINTF("ERROR - signature not matching!");
                                 goto exit_error;
@@ -622,7 +635,7 @@ parseSessionMessage(RSession self, uint8_t* buffer, int msgSize, RSessionPayload
                         }
                         else if (sigAlgo == R_SESSION_SIG_ALGO_HMAC_SHA256_256)
                         {
-                            if (memcmp(signatureBuffer, buffer + payloadEnd + 2, 32))
+                            if (constantTimeCompare(signatureBuffer, buffer + payloadEnd + 2, 32))
                             {
                                 DEBUG_PRINTF("ERROR - signature not matching!");
                                 goto exit_error;
@@ -844,7 +857,7 @@ parseSessionMessage(RSession self, uint8_t* buffer, int msgSize, RSessionPayload
 
                         if (sigAlgo == R_SESSION_SIG_ALGO_HMAC_SHA256_128)
                         {
-                            if (memcmp(signatureBuffer, buffer + payloadEnd + 2, 16))
+                            if (constantTimeCompare(signatureBuffer, buffer + payloadEnd + 2, 16))
                             {
                                 DEBUG_PRINTF("ERROR - signature not matching!");
                                 goto exit_error;
@@ -852,7 +865,7 @@ parseSessionMessage(RSession self, uint8_t* buffer, int msgSize, RSessionPayload
                         }
                         else if (sigAlgo == R_SESSION_SIG_ALGO_HMAC_SHA256_256)
                         {
-                            if (memcmp(signatureBuffer, buffer + payloadEnd + 2, 32))
+                            if (constantTimeCompare(signatureBuffer, buffer + payloadEnd + 2, 32))
                             {
                                 DEBUG_PRINTF("ERROR - signature not matching!");
                                 goto exit_error;
