@@ -257,7 +257,8 @@ parseNamedVariableAttributes(GetNamedVariableListAttributesResponse_t* response,
             {
                 AlternateAccess_t* alternateAccess = response->listOfVariable.list.array[i]->alternateAccess;
 
-                if (alternateAccess->list.count > 0)
+                if ((alternateAccess->list.count > 0) &&
+                    (alternateAccess->list.array[0]->present == AlternateAccess__Member_PR_unnamed))
                 {
                     if (alternateAccess->list.array[0]->choice.unnamed->present == AlternateAccessSelection_PR_selectAlternateAccess)
                     {

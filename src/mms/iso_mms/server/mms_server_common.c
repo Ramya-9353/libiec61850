@@ -297,10 +297,21 @@ mmsServer_isAccessToArrayComponent(AlternateAccess_t* alternateAccess)
     if (alternateAccess->list.count == 0)
         return false;
 
-    if (alternateAccess->list.array[0]->choice.unnamed->choice.selectAlternateAccess.alternateAccess != NULL)
+    if (alternateAccess->list.array[0]->present != AlternateAccess__Member_PR_unnamed)
+        return false;
+
+    AlternateAccess_t* nestedAccess =
+            alternateAccess->list.array[0]->choice.unnamed->choice.selectAlternateAccess.alternateAccess;
+
+    if (nestedAccess != NULL)
     {
-        if (alternateAccess->list.array[0]->choice.unnamed->
-                choice.selectAlternateAccess.alternateAccess->list.array[0]->choice.unnamed->choice.selectAlternateAccess.accessSelection.present ==
+        if (nestedAccess->list.count == 0)
+            return false;
+
+        if (nestedAccess->list.array[0]->present != AlternateAccess__Member_PR_unnamed)
+            return false;
+
+        if (nestedAccess->list.array[0]->choice.unnamed->choice.selectAlternateAccess.accessSelection.present ==
                         AlternateAccessSelection__selectAlternateAccess__accessSelection_PR_component)
         {
             return true;
