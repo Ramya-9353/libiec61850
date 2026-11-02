@@ -4384,6 +4384,17 @@ variableListAccessHandler(void* parameter, MmsVariableListAccessType accessType,
     {
         if (checkDataSetAccess(self, connection, listType, domain, listName, DATASET_DELETE))
         {
+            /* LD instance name of the domain (domain name is IED name + LD instance or the functional LD name) */
+            const char* ldInst = NULL;
+
+            if (listType == MMS_DOMAIN_SPECIFIC)
+            {
+                LogicalDevice* ld = IedModel_getDevice(self->model, MmsDomain_getName(domain));
+
+                if (ld)
+                    ldInst = ld->name;
+            }
+
             /* Check if data set is referenced in a report */
 
             LinkedList rcElement = self->reportControls;
@@ -4406,8 +4417,7 @@ variableListAccessHandler(void* parameter, MmsVariableListAccessType accessType,
                             {
                                 if (strcmp(rc->dataSet->name, listName) == 0)
                                 {
-                                    if (strcmp(rc->dataSet->logicalDeviceName,
-                                               MmsDomain_getName(domain) + strlen(self->model->name)) == 0)
+                                    if (ldInst && (strcmp(rc->dataSet->logicalDeviceName, ldInst) == 0))
                                     {
 #if (CONFIG_MMS_THREADLESS_STACK != 1)
                                         Semaphore_post(rc->rcbValuesLock);
@@ -4477,8 +4487,7 @@ variableListAccessHandler(void* parameter, MmsVariableListAccessType accessType,
                             {
                                 if (strcmp(lc->dataSet->name, listName) == 0)
                                 {
-                                    if (strcmp(lc->dataSet->logicalDeviceName,
-                                               MmsDomain_getName(domain) + strlen(self->model->name)) == 0)
+                                    if (ldInst && (strcmp(lc->dataSet->logicalDeviceName, ldInst) == 0))
                                     {
                                         allow = MMS_ERROR_SERVICE_OBJECT_CONSTRAINT_CONFLICT;
                                         break;
