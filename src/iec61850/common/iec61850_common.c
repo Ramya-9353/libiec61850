@@ -740,17 +740,28 @@ MmsMapping_ObjectReferenceToVariableAccessSpec(char* objectReference)
 
     FunctionalConstraint fc = FunctionalConstraint_fromString(fcStart + 1);
 
-    MmsVariableAccessSpecification* accessSpec =
-        (MmsVariableAccessSpecification*)GLOBAL_CALLOC(1, sizeof(MmsVariableAccessSpecification));
-
-    accessSpec->domainId = StringUtils_createStringFromBuffer((uint8_t*)objectReference, domainIdLen);
-
     char* indexBrace = strchr(domainIdEnd, '(');
 
     char* itemIdEnd = indexBrace;
 
     if (itemIdEnd == NULL)
         itemIdEnd = strchr(domainIdEnd, '[');
+
+    if (itemIdEnd != NULL)
+    {
+        /* item ID has to fit into itemIdStr */
+        if ((itemIdEnd - domainIdEnd - 1) > 128)
+            return NULL;
+
+        /* syntax error in array index */
+        if ((indexBrace != NULL) && (strchr(indexBrace, ')') == NULL))
+            return NULL;
+    }
+
+    MmsVariableAccessSpecification* accessSpec =
+        (MmsVariableAccessSpecification*)GLOBAL_CALLOC(1, sizeof(MmsVariableAccessSpecification));
+
+    accessSpec->domainId = StringUtils_createStringFromBuffer((uint8_t*)objectReference, domainIdLen);
 
     int objRefLen = strlen(objectReference);
 
