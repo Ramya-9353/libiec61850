@@ -13,6 +13,27 @@ using System.Collections.Generic;
 
 namespace StaticModelGenerator.C_Structures
 {
+    /* SCL text values can contain any character. Escape them so they cannot terminate the C string literal */
+    public static class C_StringLiteral
+    {
+        public static string Create(string str)
+        {
+            System.Text.StringBuilder literal = new System.Text.StringBuilder("\"");
+
+            foreach (char c in str)
+            {
+                if ((c == '"') || (c == '\\'))
+                    literal.Append('\\').Append(c);
+                else if ((c < 0x20) || (c == 0x7f))
+                    literal.Append("\\" + Convert.ToString((int)c, 8).PadLeft(3, '0'));
+                else
+                    literal.Append(c);
+            }
+
+            return literal.Append('"').ToString();
+        }
+    }
+
     /** FCs (Functional constraints) according to IEC 61850-7-2 */
     public enum eFunctionalConstraint
     {
@@ -685,7 +706,7 @@ namespace StaticModelGenerator.C_Structures
             cText += "\"" + GSEControl.Name + index + "\", ";
 
             if (GSEControl.SclGSEControl.AppID != null)
-                cText += "\"" + GSEControl.SclGSEControl.AppID + "\", ";
+                cText += C_StringLiteral.Create(GSEControl.SclGSEControl.AppID) + ", ";
             else
                 cText += "NULL, ";
 
@@ -787,7 +808,7 @@ namespace StaticModelGenerator.C_Structures
             //    cText += "  NULL,\n";
 
             if (SMVControl.SclSMVControl.SmvID != null)
-                cText += "  \"" + SMVControl.SclSMVControl.SmvID + "\",\n";
+                cText += "  " + C_StringLiteral.Create(SMVControl.SclSMVControl.SmvID) + ",\n";
             else
                 cText += "  NULL,\n";
 
@@ -930,7 +951,7 @@ namespace StaticModelGenerator.C_Structures
             cText += "\"" + ReportControl.Name + index + "\", ";
 
             if (ReportControl.SclReportControl.RptID != null)
-                cText += "\"" + ReportControl.SclReportControl.RptID + "\", ";
+                cText += C_StringLiteral.Create(ReportControl.SclReportControl.RptID) + ", ";
             else
                 cText += "NULL, ";
 

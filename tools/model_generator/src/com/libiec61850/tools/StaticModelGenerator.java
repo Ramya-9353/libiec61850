@@ -1045,7 +1045,7 @@ public class StaticModelGenerator {
             break;
             
         case UNICODE_STRING_255:
-            buffer.append("MmsValue_newMmsString(\"" + value.getValue() + "\");");
+            buffer.append("MmsValue_newMmsString(" + toCStringLiteral(value.getValue().toString()) + ");");
             break;
         case VISIBLE_STRING_32:
         case VISIBLE_STRING_64:
@@ -1053,7 +1053,7 @@ public class StaticModelGenerator {
         case VISIBLE_STRING_255:
         case VISIBLE_STRING_65:
         case CURRENCY:
-            buffer.append("MmsValue_newVisibleString(\"" + value.getValue() + "\");");
+            buffer.append("MmsValue_newVisibleString(" + toCStringLiteral(value.getValue().toString()) + ");");
             break;
         case FLOAT32:
             buffer.append("MmsValue_newFloat(" + value.getValue() + ");");
@@ -1240,7 +1240,7 @@ public class StaticModelGenerator {
             if (svCB.getSmvID() == null)
                 svString += "NULL, ";
             else
-                svString += "\"" + svCB.getSmvID() + "\", ";
+                svString += toCStringLiteral(svCB.getSmvID()) + ", ";
             
             if (svCB.getDatSet() != null)
                 svString += "\"" + svCB.getDatSet() + "\", ";
@@ -1332,7 +1332,7 @@ public class StaticModelGenerator {
                 if (gseControlBlock.getAppID() == null)
                     gseString += "NULL, ";
                 else
-                    gseString += "\"" + gseControlBlock.getAppID() + "\", ";
+                    gseString += toCStringLiteral(gseControlBlock.getAppID()) + ", ";
 
                 if (gseControlBlock.getDataSet() != null)
                     gseString += "\"" + gseControlBlock.getDataSet() + "\", ";
@@ -1667,7 +1667,7 @@ public class StaticModelGenerator {
         if (rcb.getRptID() == null)
             rcbString += "NULL, ";
         else
-            rcbString += "\"" + rcb.getRptID() + "\", ";
+            rcbString += toCStringLiteral(rcb.getRptID()) + ", ";
 
         if (rcb.isBuffered())
             rcbString += "true, ";
@@ -1749,6 +1749,24 @@ public class StaticModelGenerator {
 
     private static String toMmsString(String iecString) {
         return iecString.replace('.', '$');
+    }
+
+    /* SCL text values can contain any character. Escape them so they cannot terminate the C string literal */
+    private static String toCStringLiteral(String str) {
+        StringBuilder literal = new StringBuilder("\"");
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+
+            if ((c == '"') || (c == '\\'))
+                literal.append('\\').append(c);
+            else if ((c < 0x20) || (c == 0x7f))
+                literal.append(String.format("\\%03o", (int) c));
+            else
+                literal.append(c);
+        }
+
+        return literal.append('"').toString();
     }
 
     private void printDataSets() {

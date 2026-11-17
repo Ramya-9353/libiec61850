@@ -842,10 +842,10 @@ namespace StaticModelGenerator
                     break;
 
                 case AttributeType.UNICODE_STRING_255:
-                    c_InitializeValue.c_text += "MmsValue_newMmsString(\"" + value + "\");";
+                    c_InitializeValue.c_text += "MmsValue_newMmsString(" + C_StringLiteral.Create(value) + ");";
                     break;
                 case AttributeType.CURRENCY:
-                    c_InitializeValue.c_text += "MmsValue_newVisibleString(\"" + value + "\");";
+                    c_InitializeValue.c_text += "MmsValue_newVisibleString(" + C_StringLiteral.Create(value) + ");";
                     break;
                 case AttributeType.FLOAT32:
                     c_InitializeValue.c_text += "MmsValue_newFloat(" + float.Parse(value).ToString(".0").Replace(",", ".") + ");";
@@ -863,7 +863,7 @@ namespace StaticModelGenerator
                 case AttributeType.VISIBLE_STRING_129:
                 case AttributeType.VISIBLE_STRING_255:
                 case AttributeType.VISIBLE_STRING_65:
-                    c_InitializeValue.c_text += "MmsValue_newVisibleString(\"" + value + "\");";
+                    c_InitializeValue.c_text += "MmsValue_newVisibleString(" + C_StringLiteral.Create(value) + ");";
                     break;
 
                 default:
